@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HALTT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Barlow+Condensed:wght@300;400&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --orange:      #C94E1A;
+      --orange-soft: rgba(201, 78, 26, 0.22);
+      --navy:        #1A3B6E;
+      --navy-soft:   rgba(26, 59, 110, 0.18);
+      --bg:          #06090F;
+      --text-dim:    rgba(255,255,255,0.38);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      overflow: hidden;
+      font-family: 'Barlow Condensed', sans-serif;
+    }
+
+    .bg-mesh {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .bg-mesh::before,
+    .bg-mesh::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+    }
+    .bg-mesh::before {
+      width: 55vw; height: 55vw;
+      top: -10%; left: -10%;
+      background: var(--navy-soft);
+      animation: driftA 14s ease-in-out infinite alternate;
+    }
+    .bg-mesh::after {
+      width: 45vw; height: 45vw;
+      bottom: -12%; right: -8%;
+      background: var(--orange-soft);
+      animation: driftB 10s ease-in-out infinite alternate;
+    }
+    @keyframes driftA {
+      from { transform: translate(0,0) scale(1); }
+      to   { transform: translate(5%,7%) scale(1.1); }
+    }
+    @keyframes driftB {
+      from { transform: translate(0,0) scale(1); }
+      to   { transform: translate(-4%,-5%) scale(1.08); }
+    }
+
+    .grid {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      background-image:
+        linear-gradient(rgba(26,59,110,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(26,59,110,0.07) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+    }
+
+    .grain {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    .corner {
+      position: fixed;
+      z-index: 3;
+      width: 22px; height: 22px;
+      opacity: 0;
+      animation: popIn 0.6s ease forwards 1.4s;
+    }
+    .corner--tl { top: 24px; left: 24px;   border-top: 1.5px solid var(--orange); border-left: 1.5px solid var(--orange); }
+    .corner--tr { top: 24px; right: 24px;  border-top: 1.5px solid var(--orange); border-right: 1.5px solid var(--orange); }
+    .corner--bl { bottom: 24px; left: 24px;  border-bottom: 1.5px solid var(--orange); border-left: 1.5px solid var(--orange); }
+    .corner--br { bottom: 24px; right: 24px; border-bottom: 1.5px solid var(--orange); border-right: 1.5px solid var(--orange); }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.6); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .h-line {
+      position: fixed;
+      left: 6%; right: 6%;
+      height: 1px;
+      z-index: 3;
+      opacity: 0;
+      transform-origin: center;
+      animation: lineReveal 1s ease forwards;
+    }
+    .h-line--top    { top: 14%;    animation-delay: 1s; }
+    .h-line--bottom { bottom: 14%; animation-delay: 1.1s; }
+    .h-line::before {
+      content: '';
+      display: block;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, var(--navy) 25%, rgba(201,78,26,0.55) 50%, var(--navy) 75%, transparent 100%);
+    }
+    @keyframes lineReveal {
+      from { opacity: 0; transform: scaleX(0); }
+      to   { opacity: 0.45; transform: scaleX(1); }
+    }
+
+    main {
+      position: relative;
+      z-index: 10;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-halo {
+      position: absolute;
+      width: clamp(280px, 42vw, 500px);
+      height: clamp(280px, 42vw, 500px);
+      border-radius: 50%;
+      background: radial-gradient(circle,
+        rgba(201,78,26,0.11) 0%,
+        rgba(26,59,110,0.07) 50%,
+        transparent 72%
+      );
+      animation: haloPulse 5s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes haloPulse {
+      0%,100% { transform: scale(1);    opacity: 0.6; }
+      50%      { transform: scale(1.12); opacity: 1; }
+    }
+
+    .logo-wrap {
+      position: relative;
+      opacity: 0;
+      transform: translateY(22px);
+      animation: riseUp 1s cubic-bezier(0.16,1,0.3,1) 0.2s forwards;
+    }
+    .logo-wrap img {
+      width: clamp(200px, 28vw, 340px);
+      display: block;
+      filter:
+        drop-shadow(0 0 24px rgba(201,78,26,0.45))
+        drop-shadow(0 0 56px rgba(26,59,110,0.30));
+    }
+
+    .tagline {
+      margin-top: 16px;
+      font-size: clamp(10px, 1.15vw, 13px);
+      font-weight: 300;
+      letter-spacing: 0.55em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      opacity: 0;
+      animation: riseUp 1s cubic-bezier(0.16,1,0.3,1) 0.5s forwards;
+    }
+
+    @keyframes riseUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .sep {
+      margin-top: 44px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      opacity: 0;
+      animation: riseUp 0.8s ease 0.85s forwards;
+    }
+    .sep__line {
+      width: 50px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--orange));
+    }
+    .sep__line:last-child {
+      background: linear-gradient(90deg, var(--orange), transparent);
+    }
+    .sep__dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--orange);
+      box-shadow: 0 0 8px var(--orange);
+    }
+
+    .contact {
+      margin-top: 30px;
+      text-align: center;
+      opacity: 0;
+      animation: riseUp 0.8s cubic-bezier(0.16,1,0.3,1) 1.05s forwards;
+    }
+    .contact__label {
+      font-size: clamp(9px, 0.95vw, 11px);
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+    .contact__email {
+      display: inline-block;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 500;
+      font-size: clamp(14px, 1.9vw, 20px);
+      letter-spacing: 0.05em;
+      color: #fff;
+      text-decoration: none;
+      position: relative;
+      padding-bottom: 4px;
+      transition: color 0.3s ease;
+    }
+    .contact__email::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, var(--navy), var(--orange));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+    .contact__email:hover { color: var(--orange); }
+    .contact__email:hover::after { transform: scaleX(1); }
+
+    .badge {
+      margin-top: 54px;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 7px 20px;
+      border: 1px solid rgba(26,59,110,0.45);
+      border-radius: 2px;
+      font-size: clamp(8px, 0.88vw, 10px);
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      opacity: 0;
+      animation: riseUp 0.8s ease 1.3s forwards;
+      position: relative;
+      overflow: hidden;
+    }
+    .badge::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(26,59,110,0.1), transparent);
+      transform: translateX(-100%);
+      animation: shimmer 3.5s ease-in-out 2.2s infinite;
+    }
+    @keyframes shimmer {
+      to { transform: translateX(100%); }
+    }
+    .badge__dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--orange);
+      animation: blink 1.8s ease-in-out infinite;
+    }
+    @keyframes blink {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.2; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-mesh"></div>
+  <div class="grid"></div>
+  <div class="grain"></div>
+
+  <div class="corner corner--tl"></div>
+  <div class="corner corner--tr"></div>
+  <div class="corner corner--bl"></div>
+  <div class="corner corner--br"></div>
+  <div class="h-line h-line--top"></div>
+  <div class="h-line h-line--bottom"></div>
+
+  <main>
+    <div class="logo-halo"></div>
+
+    <div class="logo-wrap">
+      <img src="Haltt.png" alt="HALTT" />
+    </div>
+
+    <p class="tagline">Gaming Platform</p>
+
+    <div class="sep">
+      <span class="sep__line"></span>
+      <span class="sep__dot"></span>
+      <span class="sep__line"></span>
+    </div>
+
+    <div class="contact">
+      <p class="contact__label">Contato</p>
+      <a class="contact__email" href="mailto:wanderson.teixeira@haltt.io">
+        wanderson.teixeira@haltt.io
+      </a>
+    </div>
+
+    <div class="badge">
+      <span class="badge__dot"></span>
+      Em breve
+    </div>
+  </main>
+
+</body>
+</html>
